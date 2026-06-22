@@ -56,6 +56,7 @@ class DS {
         UIManager.put("OptionPane.messageForeground", TEXT_PRIMARY);
         UIManager.put("Button.background", BG_RAISED);
         UIManager.put("Button.foreground", TEXT_PRIMARY);
+        UIManager.put("Button.select", BG_HOVER);
         UIManager.put("TextField.background", BG_RAISED);
         UIManager.put("TextField.foreground", TEXT_PRIMARY);
         UIManager.put("TextField.caretForeground", ACCENT_CYAN);
@@ -77,6 +78,11 @@ class DS {
         UIManager.put("TabbedPane.selectedForeground", ACCENT_CYAN);
         UIManager.put("TitledBorder.titleColor", TEXT_SECONDARY);
         UIManager.put("Label.foreground", TEXT_PRIMARY);
+
+        // Custom dialog button colors
+        UIManager.put("OptionPane.buttonFont", new Font("Segoe UI", Font.BOLD, 12));
+        UIManager.put("OptionPane.background", BG_PANEL);
+        UIManager.put("OptionPane.messageForeground", TEXT_PRIMARY);
     }
 }
 
@@ -821,51 +827,229 @@ class CityMapPanel extends JPanel {
     }
 }
 
-// ==================== STYLED INPUT DIALOG ====================
+// ==================== FIXED STYLED INPUT DIALOG ====================
 class StyledDialog {
     static String input(Component parent, String prompt, String title) {
-        JPanel panel = new JPanel(new BorderLayout(0,8));
+        JPanel panel = new JPanel(new BorderLayout(0,10));
         panel.setBackground(DS.BG_PANEL);
-        panel.setBorder(BorderFactory.createEmptyBorder(10,14,10,14));
+        panel.setBorder(BorderFactory.createEmptyBorder(12,16,8,16));
+
         JLabel lbl = new JLabel(prompt);
         lbl.setFont(DS.FONT_BODY);
         lbl.setForeground(DS.TEXT_PRIMARY);
+        lbl.setBorder(BorderFactory.createEmptyBorder(0,0,4,0));
+
         JTextField tf = new JTextField(22);
-        tf.setBackground(DS.BG_RAISED);
+        tf.setBackground(new Color(0x0A1528));
         tf.setForeground(DS.TEXT_PRIMARY);
         tf.setCaretColor(DS.ACCENT_CYAN);
         tf.setFont(DS.FONT_BODY);
         tf.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(DS.BORDER_ACTIVE,1),
+                BorderFactory.createLineBorder(DS.BORDER_ACTIVE, 1),
                 BorderFactory.createEmptyBorder(6,10,6,10)));
+
         panel.add(lbl, BorderLayout.NORTH);
         panel.add(tf, BorderLayout.CENTER);
+
         UIManager.put("OptionPane.background", DS.BG_PANEL);
         UIManager.put("Panel.background", DS.BG_PANEL);
-        int res = JOptionPane.showConfirmDialog(parent, panel, title,
-                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
-        return res == JOptionPane.OK_OPTION ? tf.getText().trim() : null;
+        UIManager.put("OptionPane.messageForeground", DS.TEXT_PRIMARY);
+
+        // --- BRIGHT OK BUTTON ---
+        JButton okBtn = new JButton("OK");
+        okBtn.setBackground(new Color(0x00C8FF));
+        okBtn.setForeground(Color.BLACK);
+        okBtn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        okBtn.setFocusPainted(false);
+        okBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0x00E5FF), 1),
+                BorderFactory.createEmptyBorder(8,24,8,24)));
+        okBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        okBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0x00E5FF));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0x00C8FF));
+            }
+        });
+
+        // --- BRIGHT CANCEL BUTTON with BLACK BOLD TEXT ---
+        JButton cancelBtn = new JButton("Cancel");
+        cancelBtn.setBackground(new Color(0xFF4444));
+        cancelBtn.setForeground(Color.BLACK); // Black text
+        cancelBtn.setFont(new Font("Segoe UI", Font.BOLD, 13)); // Bold
+        cancelBtn.setFocusPainted(false);
+        cancelBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xFF6666), 1),
+                BorderFactory.createEmptyBorder(8,24,8,24)));
+        cancelBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        cancelBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelBtn.setBackground(new Color(0xFF6666));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelBtn.setBackground(new Color(0xFF4444));
+            }
+        });
+
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
+        buttonPanel.setBackground(DS.BG_PANEL);
+        buttonPanel.add(okBtn);
+        buttonPanel.add(cancelBtn);
+
+        Object[] options = {okBtn, cancelBtn};
+        int result = JOptionPane.showOptionDialog(parent, panel, title,
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+                null, options, options[0]);
+
+        return result == JOptionPane.OK_OPTION ? tf.getText().trim() : null;
     }
 
     static void info(Component parent, String msg, String title) {
         UIManager.put("OptionPane.background", DS.BG_PANEL);
         UIManager.put("Panel.background", DS.BG_PANEL);
-        JOptionPane.showMessageDialog(parent, styleMsg(msg), title, JOptionPane.PLAIN_MESSAGE);
+        UIManager.put("OptionPane.messageForeground", DS.TEXT_PRIMARY);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(DS.BG_PANEL);
+        panel.setBorder(BorderFactory.createEmptyBorder(10,12,6,12));
+        panel.add(styleMsg(msg), BorderLayout.CENTER);
+
+        // --- BRIGHT OK BUTTON ---
+        JButton okBtn = new JButton("OK");
+        okBtn.setBackground(new Color(0x00C8FF));
+        okBtn.setForeground(Color.BLACK);
+        okBtn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        okBtn.setFocusPainted(false);
+        okBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0x00E5FF), 1),
+                BorderFactory.createEmptyBorder(8,32,8,32)));
+        okBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        okBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0x00E5FF));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0x00C8FF));
+            }
+        });
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        btnPanel.setBackground(DS.BG_PANEL);
+        btnPanel.add(okBtn);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+
+        JOptionPane.showOptionDialog(parent, panel, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE,
+                null, new Object[]{okBtn}, okBtn);
     }
 
     static void warn(Component parent, String msg, String title) {
         UIManager.put("OptionPane.background", DS.BG_PANEL);
-        JOptionPane.showMessageDialog(parent, styleMsg(msg), title, JOptionPane.WARNING_MESSAGE);
+        UIManager.put("Panel.background", DS.BG_PANEL);
+        UIManager.put("OptionPane.messageForeground", DS.TEXT_PRIMARY);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(DS.BG_PANEL);
+        panel.setBorder(BorderFactory.createEmptyBorder(10,12,6,12));
+        JLabel msgLbl = styleMsg(msg);
+        msgLbl.setForeground(DS.WARN);
+        panel.add(msgLbl, BorderLayout.CENTER);
+
+        // --- BRIGHT OK BUTTON with warning color ---
+        JButton okBtn = new JButton("OK");
+        okBtn.setBackground(new Color(0xFFB020));
+        okBtn.setForeground(Color.BLACK);
+        okBtn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        okBtn.setFocusPainted(false);
+        okBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xFFCC44), 1),
+                BorderFactory.createEmptyBorder(8,32,8,32)));
+        okBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        okBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0xFFCC44));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0xFFB020));
+            }
+        });
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        btnPanel.setBackground(DS.BG_PANEL);
+        btnPanel.add(okBtn);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+
+        JOptionPane.showOptionDialog(parent, panel, title,
+                JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
+                null, new Object[]{okBtn}, okBtn);
     }
 
     static boolean confirm(Component parent, String msg, String title) {
         UIManager.put("OptionPane.background", DS.BG_PANEL);
-        return JOptionPane.showConfirmDialog(parent, styleMsg(msg), title,
-                JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+        UIManager.put("Panel.background", DS.BG_PANEL);
+        UIManager.put("OptionPane.messageForeground", DS.TEXT_PRIMARY);
+
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBackground(DS.BG_PANEL);
+        panel.setBorder(BorderFactory.createEmptyBorder(10,12,6,12));
+        panel.add(styleMsg(msg), BorderLayout.CENTER);
+
+        // --- BRIGHT YES BUTTON ---
+        JButton yesBtn = new JButton("Yes");
+        yesBtn.setBackground(new Color(0x00D46A));
+        yesBtn.setForeground(Color.BLACK);
+        yesBtn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        yesBtn.setFocusPainted(false);
+        yesBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0x00E888), 1),
+                BorderFactory.createEmptyBorder(8,24,8,24)));
+        yesBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        yesBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                yesBtn.setBackground(new Color(0x00E888));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                yesBtn.setBackground(new Color(0x00D46A));
+            }
+        });
+
+        // --- BRIGHT NO BUTTON with BLACK BOLD TEXT ---
+        JButton noBtn = new JButton("No");
+        noBtn.setBackground(new Color(0xFF4444));
+        noBtn.setForeground(Color.BLACK); // Black text
+        noBtn.setFont(new Font("Segoe UI", Font.BOLD, 13)); // Bold
+        noBtn.setFocusPainted(false);
+        noBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xFF6666), 1),
+                BorderFactory.createEmptyBorder(8,24,8,24)));
+        noBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        noBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                noBtn.setBackground(new Color(0xFF6666));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                noBtn.setBackground(new Color(0xFF4444));
+            }
+        });
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
+        btnPanel.setBackground(DS.BG_PANEL);
+        btnPanel.add(yesBtn);
+        btnPanel.add(noBtn);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+
+        Object[] options = {yesBtn, noBtn};
+        int result = JOptionPane.showOptionDialog(parent, panel, title,
+                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, options, options[0]);
+
+        return result == JOptionPane.YES_OPTION;
     }
 
     private static JLabel styleMsg(String msg) {
-        JLabel l = new JLabel("<html><body style='width:300px;color:#E8EDFB;font-family:Segoe UI'>" +
+        JLabel l = new JLabel("<html><body style='width:340px;color:#E8EDFB;font-family:Segoe UI;font-size:12px'>" +
                 msg.replace("\n","<br>") + "</body></html>");
         l.setFont(DS.FONT_BODY);
         l.setBorder(BorderFactory.createEmptyBorder(8,8,8,8));
@@ -875,8 +1059,91 @@ class StyledDialog {
     static <T> T combo(Component parent, String prompt, String title, T[] options, T def) {
         UIManager.put("OptionPane.background", DS.BG_PANEL);
         UIManager.put("Panel.background", DS.BG_PANEL);
-        return (T)JOptionPane.showInputDialog(parent, prompt, title,
-                JOptionPane.QUESTION_MESSAGE, null, options, def);
+        UIManager.put("OptionPane.messageForeground", DS.TEXT_PRIMARY);
+
+        JPanel panel = new JPanel(new BorderLayout(0,10));
+        panel.setBackground(DS.BG_PANEL);
+        panel.setBorder(BorderFactory.createEmptyBorder(12,16,8,16));
+
+        JLabel lbl = new JLabel(prompt);
+        lbl.setFont(DS.FONT_BODY);
+        lbl.setForeground(DS.TEXT_PRIMARY);
+
+        JComboBox<T> combo = new JComboBox<>(options);
+        combo.setBackground(DS.BG_RAISED);
+        combo.setForeground(DS.TEXT_PRIMARY);
+        combo.setFont(DS.FONT_BODY);
+        combo.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(DS.BORDER_ACTIVE, 1),
+                BorderFactory.createEmptyBorder(4,8,4,8)));
+        combo.setRenderer(new DefaultListCellRenderer() {
+            @Override
+            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
+                                                          boolean isSelected, boolean cellHasFocus) {
+                super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+                if (value != null) {
+                    setText(value.toString());
+                    setBackground(isSelected ? DS.BG_HOVER : DS.BG_PANEL);
+                    setForeground(DS.TEXT_PRIMARY);
+                }
+                return this;
+            }
+        });
+        if (def != null) combo.setSelectedItem(def);
+
+        panel.add(lbl, BorderLayout.NORTH);
+        panel.add(combo, BorderLayout.CENTER);
+
+        // --- BRIGHT OK BUTTON ---
+        JButton okBtn = new JButton("OK");
+        okBtn.setBackground(new Color(0x00C8FF));
+        okBtn.setForeground(Color.BLACK);
+        okBtn.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        okBtn.setFocusPainted(false);
+        okBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0x00E5FF), 1),
+                BorderFactory.createEmptyBorder(8,24,8,24)));
+        okBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        okBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0x00E5FF));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                okBtn.setBackground(new Color(0x00C8FF));
+            }
+        });
+
+        // --- BRIGHT CANCEL BUTTON with BLACK BOLD TEXT ---
+        JButton cancelBtn = new JButton("Cancel");
+        cancelBtn.setBackground(new Color(0xFF4444));
+        cancelBtn.setForeground(Color.BLACK); // Black text
+        cancelBtn.setFont(new Font("Segoe UI", Font.BOLD, 13)); // Bold
+        cancelBtn.setFocusPainted(false);
+        cancelBtn.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(0xFF6666), 1),
+                BorderFactory.createEmptyBorder(8,24,8,24)));
+        cancelBtn.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        cancelBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                cancelBtn.setBackground(new Color(0xFF6666));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                cancelBtn.setBackground(new Color(0xFF4444));
+            }
+        });
+
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 12, 12));
+        btnPanel.setBackground(DS.BG_PANEL);
+        btnPanel.add(okBtn);
+        btnPanel.add(cancelBtn);
+        panel.add(btnPanel, BorderLayout.SOUTH);
+
+        Object[] opts = {okBtn, cancelBtn};
+        int result = JOptionPane.showOptionDialog(parent, panel, title,
+                JOptionPane.OK_CANCEL_OPTION, JOptionPane.QUESTION_MESSAGE,
+                null, opts, opts[0]);
+
+        return result == JOptionPane.OK_OPTION ? (T)combo.getSelectedItem() : null;
     }
 }
 
@@ -1034,14 +1301,6 @@ class StatsPanel extends JPanel {
 
         for(StatCard sc : new StatCard[]{scVehicles,scEmergency,scAvail,scEnRoute,scIncidents,scBlocked,scMarkers})
             grid.add(sc);
-
-        // Live clock card
-        StatCard scClock = new StatCard("LIVE", "", DS.ACCENT_TEAL) {
-            @Override protected void paintComponent(Graphics g) {
-                super.paintComponent(g);
-                // Override value with time
-            }
-        };
 
         add(title, BorderLayout.NORTH);
         add(grid, BorderLayout.CENTER);
